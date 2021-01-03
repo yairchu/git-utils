@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# If resuming on previous rebase and solved all conflicts, do the "git rebase --continue" action
+git status | grep "all conflicts fixed: run \"git rebase --continue\"" && git rebase --continue
+
 BASE=${1:-master}
 while true
 do

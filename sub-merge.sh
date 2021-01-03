@@ -9,6 +9,8 @@ do
         echo Conflicts when merging with $COMMIT, merging with its parent
         git reset --hard >/dev/null
         git merge --no-edit $COMMIT^
+        echo Merging with $COMMIT
+        git merge $COMMIT
         exit 1
     fi
 done
