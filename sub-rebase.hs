@@ -5,13 +5,12 @@
 
 import GitUtils
 
-import Control.Monad
-import Control.Lens.Operators
-import Data.Foldable.Extra
-import Data.List
-import Data.Maybe
+import Control.Monad (when)
+import Data.Functor ((<&>))
+import Data.List (isInfixOf)
+import Data.Maybe (fromMaybe)
 import qualified Options.Applicative as O
-import System.Exit
+import System.Exit (ExitCode(..))
 import System.Process
 
 opts :: O.ParserInfo String

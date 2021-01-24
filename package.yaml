@@ -7,10 +7,14 @@ author: yairchu
 library:
   source-dirs: lib
 
+ghc-options:
+- -Wall
+- -Wcompat
+- -Wredundant-constraints
+
 dependencies:
 - base
 - extra
-- lens
 - optparse-applicative
 - process
 
