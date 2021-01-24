@@ -17,7 +17,6 @@ commitsTo :: String -> IO [String]
 commitsTo = fmap (reverse . lines) . cmd . ("git rev-list .." <>)
 
 firstCommitInPathTo :: String -> IO (Maybe String)
-firstCommitInPathTo base =
-    do
-        a <- commonAncestor base
-        commitsTo base >>= findM (isStrictlyAhead a)
+firstCommitInPathTo base = do
+    a <- commonAncestor base
+    commitsTo base >>= findM (isStrictlyAhead a)
