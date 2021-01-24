@@ -3,6 +3,8 @@
 
 {-# LANGUAGE LambdaCase #-}
 
+import GitUtils
+
 import Control.Monad
 import Control.Lens.Operators
 import Data.Foldable.Extra
@@ -20,25 +22,15 @@ opts =
             <&> fromMaybe "master"))
     (O.fullDesc <> O.progDesc "Gradually rebase to handle less merge conflicts at a time")
 
-cmd :: String -> IO String
-cmd x = readCreateProcess (shell x) ""
-
 subRebase :: String -> IO ()
 subRebase base =
-    do
-        commonAncestor <- cmd ("git merge-base HEAD " <> base)
-        let isStrictlyAhead commit =
-                cmd ("git merge-base HEAD " <> commit) <&> (== commonAncestor)
-        cmd ("git rev-list .." <> base)
-            <&> lines <&> reverse
-            >>= findM isStrictlyAhead
-            >>=
-            \case
-            Nothing -> putStrLn "Done"
-            Just commit -> do
-                putStrLn ("Rebasing over " <> commit)
-                spawnCommand ("git rebase " <> commit) >>= waitForProcess
-                    >>= (`when` subRebase base) . (== ExitSuccess)
+    firstCommitInPathTo base >>=
+    \case
+    Nothing -> putStrLn "Done"
+    Just commit -> do
+        putStrLn ("Rebasing over " <> commit)
+        spawnCommand ("git rebase " <> commit) >>= waitForProcess
+            >>= (`when` subRebase base) . (== ExitSuccess)
 
 allConflictsFixed :: IO Bool
 allConflictsFixed =
