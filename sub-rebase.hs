@@ -1,5 +1,5 @@
 #!/usr/bin/env stack
--- stack --resolver nightly-2021-01-03 script
+-- stack --resolver nightly-2021-01-03 script -ilib"
 
 {-# LANGUAGE LambdaCase #-}
 

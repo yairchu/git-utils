@@ -1,0 +1,21 @@
+name: git-utils
+version: 0
+github: yairchu/git-utils
+license: BSD3
+author: yairchu
+
+library:
+  source-dirs: lib
+
+dependencies:
+- base
+- extra
+- lens
+- optparse-applicative
+- process
+
+executables:
+  sub-rebase:
+    main: sub-rebase.hs
+    dependencies:
+    - git-utils
