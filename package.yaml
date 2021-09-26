@@ -6,6 +6,8 @@ author: yairchu
 
 library:
   source-dirs: lib
+  dependencies:
+  - directory
 
 ghc-options:
 - -Wall

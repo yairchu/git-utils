@@ -1,7 +1,10 @@
-module GitUtils (firstCommitInPathTo, cmd) where
+{-# LANGUAGE LambdaCase #-}
+
+module GitUtils (firstCommitInPathTo, cmd, defaultBranch) where
 
 import Data.Foldable.Extra (findM)
 import Data.Functor ((<&>))
+import System.Directory
 import System.Process
 
 cmd :: String -> IO String
@@ -20,3 +23,13 @@ firstCommitInPathTo :: String -> IO (Maybe String)
 firstCommitInPathTo base = do
     a <- commonAncestor base
     commitsTo base >>= findM (isStrictlyAhead a)
+
+gitFolder :: IO String
+gitFolder = cmd "git rev-parse --show-toplevel"
+
+defaultBranch :: IO String
+defaultBranch =
+    gitFolder >>= doesFileExist . (<> "/.git/refs/heads/master") <&>
+    \case
+    True -> "master"
+    False -> "main"

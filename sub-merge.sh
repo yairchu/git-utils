@@ -1,6 +1,8 @@
 #!/bin/bash
 
-BASE=${1:-master}
+GIT_FOLDER=`git rev-parse --show-toplevel`/.git
+DEFAULT_BRANCH=`[ -f ${GIT_FOLDER}/refs/heads/master ] && echo master || echo main`
+BASE=${1:-$DEFAULT_BRANCH}
 for COMMIT in $(git rev-list ..$BASE --reverse)
 do
     if git merge --no-commit $COMMIT >/dev/null 2>/dev/null; then

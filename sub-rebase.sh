@@ -3,7 +3,9 @@
 # If resuming on previous rebase and solved all conflicts, do the "git rebase --continue" action
 git status | grep "all conflicts fixed: run \"git rebase --continue\"" && git rebase --continue
 
-BASE=${1:-master}
+GIT_FOLDER=`git rev-parse --show-toplevel`/.git
+DEFAULT_BRANCH=`[ -f ${GIT_FOLDER}/refs/heads/master ] && echo master || echo main`
+BASE=${1:-$DEFAULT_BRANCH}
 while true
 do
     # Find next commit to rebase to

@@ -5,19 +5,18 @@
 import GitUtils
 
 import Control.Monad (when)
+import Control.Monad.Extra (fromMaybeM)
 import Data.Functor ((<&>))
 import Data.List (isInfixOf)
-import Data.Maybe (fromMaybe)
 import qualified Options.Applicative as O
 import System.Exit (ExitCode(..))
 import System.Process
 
-opts :: O.ParserInfo String
+opts :: O.ParserInfo (Maybe String)
 opts =
     O.info
     (O.helper <*>
-        (O.optional (O.strArgument (O.metavar "BASE" <> O.help "Base branch to rebase over"))
-            <&> fromMaybe "master"))
+        O.optional (O.strArgument (O.metavar "BASE" <> O.help "Base branch to rebase over")))
     (O.fullDesc <> O.progDesc "Gradually rebase to handle less merge conflicts at a time")
 
 subRebase :: String -> IO ()
@@ -36,6 +35,6 @@ allConflictsFixed =
 
 main :: IO ()
 main = do
-    base <- O.execParser opts
+    base <- fromMaybeM defaultBranch (O.execParser opts)
     allConflictsFixed >>= (`when` callCommand "git rebase --continue")
     subRebase base
