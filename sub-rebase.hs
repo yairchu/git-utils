@@ -7,6 +7,7 @@ import GitUtils
 import Control.Monad (when)
 import Control.Monad.Extra (fromMaybeM)
 import Data.Functor ((<&>))
+import Data.Maybe (fromJust)
 import Data.List (isInfixOf)
 import qualified Options.Applicative as O
 import System.Exit (ExitCode(..))
@@ -31,7 +32,7 @@ subRebase base =
 
 allConflictsFixed :: IO Bool
 allConflictsFixed =
-    cmd "git status" <&> isInfixOf "all conflicts fixed: run \"git rebase --continue\""
+    cmd "git status" <&> isInfixOf "all conflicts fixed: run \"git rebase --continue\"" . fromJust
 
 main :: IO ()
 main = do

@@ -25,3 +25,7 @@ executables:
     main: sub-rebase.hs
     dependencies:
     - git-utils
+  remerge:
+    main: remerge.hs
+    dependencies:
+    - git-utils

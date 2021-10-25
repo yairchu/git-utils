@@ -4,20 +4,26 @@ module GitUtils (firstCommitInPathTo, cmd, defaultBranch) where
 
 import Data.Foldable.Extra (findM)
 import Data.Functor ((<&>))
-import System.Directory
+import Data.Maybe (fromJust)
+import System.Directory (doesFileExist)
+import System.Exit
 import System.Process
 
-cmd :: String -> IO String
-cmd x = readCreateProcess (shell x) ""
+cmd :: String -> IO (Maybe String)
+cmd x =
+    f <$> readCreateProcessWithExitCode (shell x) ""
+    where
+        f (ExitSuccess, r, _) = Just r
+        f _ = Nothing
 
 commonAncestor :: String -> IO String
-commonAncestor = cmd . ("git merge-base HEAD " <>)
+commonAncestor = fmap fromJust . cmd . ("git merge-base HEAD " <>)
 
 isStrictlyAhead :: String -> String -> IO Bool
-isStrictlyAhead base commit = cmd ("git merge-base HEAD " <> commit) <&> (== base)
+isStrictlyAhead base commit = cmd ("git merge-base HEAD " <> commit) <&> (== Just base)
 
 commitsTo :: String -> IO [String]
-commitsTo = fmap (reverse . lines) . cmd . ("git rev-list .." <>)
+commitsTo = fmap (reverse . lines . fromJust) . cmd . ("git rev-list .." <>)
 
 firstCommitInPathTo :: String -> IO (Maybe String)
 firstCommitInPathTo base = do
@@ -25,7 +31,7 @@ firstCommitInPathTo base = do
     commitsTo base >>= findM (isStrictlyAhead a)
 
 gitFolder :: IO String
-gitFolder = cmd "git rev-parse --show-toplevel" <&> takeWhile (`notElem` "\r\n")
+gitFolder = cmd "git rev-parse --show-toplevel" <&> takeWhile (`notElem` "\r\n") . fromJust
 
 defaultBranch :: IO String
 defaultBranch =
