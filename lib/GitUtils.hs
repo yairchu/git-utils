@@ -25,7 +25,7 @@ firstCommitInPathTo base = do
     commitsTo base >>= findM (isStrictlyAhead a)
 
 gitFolder :: IO String
-gitFolder = cmd "git rev-parse --show-toplevel"
+gitFolder = cmd "git rev-parse --show-toplevel" <&> takeWhile (`notElem` "\r\n")
 
 defaultBranch :: IO String
 defaultBranch =
