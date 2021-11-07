@@ -29,3 +29,7 @@ executables:
     main: remerge.hs
     dependencies:
     - git-utils
+  rerevert:
+    main: rerevert.hs
+    dependencies:
+    - git-utils
