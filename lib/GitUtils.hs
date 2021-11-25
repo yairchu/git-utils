@@ -4,8 +4,8 @@ module GitUtils (firstCommitInPathTo, cmd, defaultBranch) where
 
 import Data.Foldable.Extra (findM)
 import Data.Functor ((<&>))
-import Data.Maybe (fromJust)
-import System.Directory (doesFileExist)
+import Data.List (isInfixOf)
+import Data.Maybe (fromJust, fromMaybe)
 import System.Exit
 import System.Process
 
@@ -23,19 +23,20 @@ isStrictlyAhead :: String -> String -> IO Bool
 isStrictlyAhead base commit = cmd ("git merge-base HEAD " <> commit) <&> (== Just base)
 
 commitsTo :: String -> IO [String]
-commitsTo = fmap (reverse . lines . fromJust) . cmd . ("git rev-list .." <>)
+commitsTo dst =
+    cmd command
+    <&> reverse . lines . fromMaybe ("error from " <> show command)
+    where
+        command = "git rev-list .." <> dst
 
 firstCommitInPathTo :: String -> IO (Maybe String)
 firstCommitInPathTo base = do
     a <- commonAncestor base
     commitsTo base >>= findM (isStrictlyAhead a)
 
-gitFolder :: IO String
-gitFolder = cmd "git rev-parse --show-toplevel" <&> takeWhile (`notElem` "\r\n") . fromJust
-
 defaultBranch :: IO String
 defaultBranch =
-    gitFolder >>= doesFileExist . (<> "/.git/refs/heads/master") <&>
+    cmd "git branch" <&>
     \case
-    True -> "master"
-    False -> "main"
+    Just x | isInfixOf " master\n" x -> "master"
+    _ -> "main"
