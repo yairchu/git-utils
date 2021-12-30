@@ -1,7 +1,7 @@
 # git-utils
 Small helpers for using git
 
-## `sub-rebase.sh`
+## `sub-rebase`
 
 Rebase gradually: replay branch commits over newer commits on target branch, to handle the conflicts in smaller units.
 
