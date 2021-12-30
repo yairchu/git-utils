@@ -36,6 +36,7 @@ allConflictsFixed =
 
 main :: IO ()
 main = do
-    base <- fromMaybeM defaultBranch (O.execParser opts)
+    base <- fromMaybeM defaultBaseBranch (O.execParser opts)
+    putStrLn ("Rebasing onto: " <> base)
     allConflictsFixed >>= (`when` callCommand "git rebase --continue")
     subRebase base
