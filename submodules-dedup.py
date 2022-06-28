@@ -18,26 +18,13 @@ def command_output(cmd):
     return subprocess.Popen(cmd.split(), stdout=subprocess.PIPE).stdout.read().decode("utf-8")
 
 
-def strip_prefix(text, prefix):
-    if not text.startswith(prefix):
-        return text
-    return text[len(prefix):]
-
-
-def strip_suffix(text, suffix):
-    # From http://stackoverflow.com/a/1038999/40916
-    if not text.endswith(suffix):
-        return text
-    return text[:len(text)-len(suffix)]
-
-
 def list_submodules():
     for line in command_output("git config --file .gitmodules --get-regexp submodule\..*\.url").splitlines():
         [key, value] = line.split(" ", 1)
         name = key.split(".", 1)[1].rsplit(".", 1)[0]
         yield {
             "local": command_output(f"git config --file .gitmodules submodule.{name}.path").strip(),
-            "remote": strip_suffix(value, ".git"),
+            "remote": value.removesuffix(".git"),
         }
 
 
@@ -60,8 +47,10 @@ def init_submodules(recursive, level=0):
     for submodule in list_submodules():
         print(f"""{indent}{submodule["local"]}""")
         shared_path = base_path.joinpath(
-            strip_prefix(submodule["remote"], "https://"))
+            submodule["remote"].removeprefix("https://"))
+
         if command_output(f"""git submodule status {submodule["local"]}""").startswith("-"):
+            # Need to initialize submodule
             shared_path.parent.mkdir(parents=True, exist_ok=True)
             if not shared_path.exists():
                 command_output(
@@ -69,14 +58,23 @@ def init_submodules(recursive, level=0):
             print(f"""{indent}  => {shared_path}""")
             command_output(
                 f"""git submodule update --reference {shared_path} --init {submodule["local"]}""")
+        else:
+            # Submodule already initialized, check if deduped
+            submodule_dot_git = open(
+                Path(submodule["local"]).joinpath(".git"), "rt").read()
+            git_dir_pref = "gitdir: "
+            assert submodule_dot_git.startswith(git_dir_pref)
+            git_dir = Path(submodule["local"]).joinpath(
+                submodule_dot_git.removeprefix(git_dir_pref).strip())
+            if not git_dir.joinpath("objects/info/alternates").exists():
+                print(f"{indent}  !! NOT DEDUPED !!")
+
         if recursive:
             with cwd(submodule["local"]):
                 init_submodules(recursive, level+1)
 
 
 parser = argparse.ArgumentParser()
-
-
 parser.add_argument(
     "--recursive",
     help="Initialize nested submodules",
@@ -84,8 +82,6 @@ parser.add_argument(
     action="store_true",
 )
 
-
 args = parser.parse_args()
-
 
 init_submodules(args.recursive)
