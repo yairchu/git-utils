@@ -19,7 +19,8 @@ def command_output(cmd):
 
 
 def list_submodules():
-    for line in command_output("git config --file .gitmodules --get-regexp submodule\..*\.url").splitlines():
+    for line in command_output(
+            r"git config --file .gitmodules --get-regexp submodule\..*\.url").splitlines():
         [key, value] = line.split(" ", 1)
         name = key.split(".", 1)[1].rsplit(".", 1)[0]
         yield {
@@ -68,7 +69,7 @@ def init_submodules(recursive, level=0):
         else:
             # Submodule already initialized, check if deduped
             submodule_dot_git = open(
-                Path(submodule["local"]).joinpath(".git"), "rt").read()
+                Path(submodule["local"]).joinpath(".git"), encoding="utf-8").read()
             git_dir_pref = "gitdir: "
             assert submodule_dot_git.startswith(git_dir_pref)
             git_dir = Path(submodule["local"]).joinpath(
