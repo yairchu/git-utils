@@ -16,3 +16,7 @@ A merging variant of `sub-rebase.sh`
 A tool to normalize line endings to reduce diffs.
 It may normalize line endings to either '\n' (unix) or '\r\n' (windows)
 depending on which one best reduces the diff size.
+
+## `submodules-dedup.py`
+
+A tool to avoid recloning submodules that are repeated across different repositories.
