@@ -44,14 +44,21 @@ for (filename, stats) in diffs():
         print(
             f"{filename}: Changed to {label} line endings, reducing diff by {stats-new_stats} lines.")
         return True
-    content = open(filename, "rb").read()
+
+    with open(filename, "rb") as file:
+        content = file.read()
+
+    def write(new_content):
+        with open(filename, "wb") as file:
+            file.write(new_content)
+
     unix_style = content.replace(b"\r", b"")
-    open(filename, "wb").write(unix_style)
+    write(unix_style)
     if check_success("unix"):
         continue
     windows_style = unix_style.replace(b"\n", b"\r\n")
-    open(filename, "wb").write(windows_style)
+    write(windows_style)
     if check_success("windows"):
         continue
-    open(filename, "wb").write(content)
+    write(content)
     print(f"{filename}: No simple fix")
