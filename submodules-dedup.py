@@ -68,9 +68,7 @@ def init_submodules(recursive, level=0):
                 f"""git submodule update --reference {shared_path} --init {submodule["local"]}""")
         else:
             # Submodule already initialized, check if deduped
-            with open(
-                    Path(submodule["local"]).joinpath(".git"), encoding="utf-8") as file:
-                submodule_dot_git = file.read()
+            submodule_dot_git = Path(submodule["local"]).joinpath(".git").read_text("utf-8")
             git_dir_pref = "gitdir: "
             assert submodule_dot_git.startswith(git_dir_pref)
             git_dir = Path(submodule["local"]).joinpath(
