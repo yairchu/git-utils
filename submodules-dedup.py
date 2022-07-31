@@ -42,12 +42,19 @@ def cwd(path):
 base_path = Path.home().joinpath("submodules")
 
 
+def submodule_sub_path(remote):
+    ssh_pref = "git@"
+    if remote.startswith(ssh_pref):
+        return "/".join(remote.removeprefix(ssh_pref).split(":", 1))
+    return remote.removeprefix("https://").removesuffix(".git")
+
+
 def init_submodules(recursive, level=0):
     indent = "    "*level
     for submodule in list_submodules():
         print(f"""{indent}{submodule["local"]}""")
         shared_path = base_path.joinpath(
-            submodule["remote"].removeprefix("https://"))
+            submodule_sub_path(submodule["remote"]))
 
         if command_output(f"""git submodule status {submodule["local"]}""").startswith("-"):
             # Need to initialize submodule
